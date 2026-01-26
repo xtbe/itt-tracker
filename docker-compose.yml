@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: investment-tracker-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-investment_tracker}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - investment-tracker-network
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: investment-tracker-api
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-investment_tracker}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - investment-tracker-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: investment-tracker-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - investment-tracker-network
+
+volumes:
+  postgres_data:
+
+networks:
+  investment-tracker-network:
+    driver: bridge
