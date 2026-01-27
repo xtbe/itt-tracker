@@ -1,8 +1,8 @@
 import React from 'react';
-import { PlusCircle } from 'lucide-react';
-import { calculateHoldingMetrics } from '../utils/calculations';
+import { PlusCircle, Edit2, Trash2 } from 'lucide-react';
+import { calculateHoldingMetrics, convertCurrency } from '../utils/calculations';
 
-const HoldingsTable = ({ holdings, selectedAccount, setShowAddHolding }) => {
+const HoldingsTable = ({ holdings, selectedAccount, setShowAddHolding, editHolding, deleteHolding, baseCurrency, fxRates }) => {
   const filteredHoldings = selectedAccount === 'all'
     ? holdings
     : holdings.filter(h => h.account_id == selectedAccount);
@@ -30,9 +30,11 @@ const HoldingsTable = ({ holdings, selectedAccount, setShowAddHolding }) => {
               <th className="text-right py-3 px-4 text-slate-600 font-semibold">Quantity</th>
               <th className="text-right py-3 px-4 text-slate-600 font-semibold">Avg Cost</th>
               <th className="text-right py-3 px-4 text-slate-600 font-semibold">Current Price</th>
+              <th className="text-right py-3 px-4 text-slate-600 font-semibold">Total Cost</th>
               <th className="text-right py-3 px-4 text-slate-600 font-semibold">Total Value</th>
               <th className="text-right py-3 px-4 text-slate-600 font-semibold">Gain/Loss</th>
               <th className="text-right py-3 px-4 text-slate-600 font-semibold">Dividend Yield</th>
+              <th className="text-center py-3 px-4 text-slate-600 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -47,20 +49,54 @@ const HoldingsTable = ({ holdings, selectedAccount, setShowAddHolding }) => {
                       {holding.type}
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-right text-slate-800">{holding.quantity}</td>
                   <td className="py-4 px-4 text-right text-slate-800">
-                    {holding.currency} {parseFloat(holding.purchase_price).toFixed(2)}
+                    {holding.type && holding.type.toLowerCase() === 'bond'
+                      ? `${holding.quantity.toLocaleString()} nominal`
+                      : holding.quantity}
                   </td>
                   <td className="py-4 px-4 text-right text-slate-800">
-                    {holding.currency} {parseFloat(holding.current_price).toFixed(2)}
+                    {holding.type && holding.type.toLowerCase() === 'bond'
+                      ? <div>
+                          <div>{parseFloat(holding.purchase_price).toFixed(2)}</div>
+                          <div className="text-xs text-slate-500">per 100</div>
+                        </div>
+                      : `${holding.currency} ${parseFloat(holding.purchase_price).toFixed(2)}`
+                    }
+                  </td>
+                  <td className="py-4 px-4 text-right text-slate-800">
+                    {holding.type && holding.type.toLowerCase() === 'bond'
+                      ? <div>
+                          <div>{parseFloat(holding.current_price).toFixed(2)}</div>
+                          <div className="text-xs text-slate-500">per 100</div>
+                        </div>
+                      : `${holding.currency} ${parseFloat(holding.current_price).toFixed(2)}`
+                    }
+                  </td>
+                  <td className="py-4 px-4 text-right text-slate-800">
+                    <div>{holding.currency} {metrics.totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    {holding.currency !== baseCurrency && (
+                      <div className="text-xs text-slate-500">
+                        ≈ {baseCurrency} {convertCurrency(metrics.totalCost, holding.currency, baseCurrency, fxRates).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                      </div>
+                    )}
                   </td>
                   <td className="py-4 px-4 text-right font-semibold text-slate-800">
-                    {holding.currency} {metrics.currentValue.toLocaleString(undefined, {minimumFractionDigits: 2})}
+                    <div>{holding.currency} {metrics.currentValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    {holding.currency !== baseCurrency && (
+                      <div className="text-xs text-slate-500 font-normal">
+                        ≈ {baseCurrency} {convertCurrency(metrics.currentValue, holding.currency, baseCurrency, fxRates).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                      </div>
+                    )}
                   </td>
                   <td className="py-4 px-4 text-right">
                     <div className={`font-semibold ${metrics.gainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {metrics.gainLoss >= 0 ? '+' : ''}{holding.currency} {metrics.gainLoss.toFixed(2)}
+                      {metrics.gainLoss >= 0 ? '+' : ''}{holding.currency} {metrics.gainLoss.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                     </div>
+                    {holding.currency !== baseCurrency && (
+                      <div className={`text-xs ${metrics.gainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        ≈ {baseCurrency} {convertCurrency(metrics.gainLoss, holding.currency, baseCurrency, fxRates).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                      </div>
+                    )}
                     <div className={`text-sm ${metrics.gainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {metrics.gainLoss >= 0 ? '+' : ''}{metrics.gainLossPercent.toFixed(2)}%
                     </div>
@@ -69,6 +105,29 @@ const HoldingsTable = ({ holdings, selectedAccount, setShowAddHolding }) => {
                     <div className="text-slate-800 font-medium">{parseFloat(holding.dividend_yield).toFixed(2)}%</div>
                     <div className="text-sm text-slate-600">
                       {holding.currency} {metrics.annualDividend.toFixed(2)}/yr
+                    </div>
+                    {holding.currency !== baseCurrency && (
+                      <div className="text-xs text-slate-500">
+                        ≈ {baseCurrency} {convertCurrency(metrics.annualDividend, holding.currency, baseCurrency, fxRates).toFixed(2)}/yr
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => editHolding(holding)}
+                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        title="Edit holding"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteHolding(holding.id)}
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                        title="Delete holding"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>

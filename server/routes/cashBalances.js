@@ -43,28 +43,15 @@ router.post('/', async (req, res, next) => {
     let result;
 
     if (existing.rows.length > 0) {
-      // Update existing balance
+      // Update existing balance (allow negative balances)
       const newAmount = parseFloat(existing.rows[0].amount) + parseFloat(amount);
-
-      // If balance becomes zero or negative, delete the record
-      if (newAmount <= 0) {
-        await pool.query(
-          'DELETE FROM cash_balances WHERE account_id = $1 AND currency = $2',
-          [account_id, currency]
-        );
-        return res.json({ message: 'Cash balance removed', amount: 0 });
-      }
 
       result = await pool.query(
         'UPDATE cash_balances SET amount = $1, updated_at = NOW() WHERE account_id = $2 AND currency = $3 RETURNING *',
         [newAmount, account_id, currency]
       );
     } else {
-      // Create new cash balance
-      if (amount <= 0) {
-        return res.status(400).json({ error: 'Initial amount must be positive' });
-      }
-
+      // Create new cash balance (allow any initial amount including negative for corrections)
       result = await pool.query(
         'INSERT INTO cash_balances (account_id, currency, amount) VALUES ($1, $2, $3) RETURNING *',
         [account_id, currency, amount]

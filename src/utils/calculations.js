@@ -1,9 +1,23 @@
 export const calculateHoldingMetrics = (holding) => {
-  const totalCost = holding.quantity * holding.purchase_price;
-  const currentValue = holding.quantity * holding.current_price;
+  // Ensure all values are numbers
+  const quantity = parseFloat(holding.quantity) || 0;
+  let purchasePrice = parseFloat(holding.purchase_price) || 0;
+  let currentPrice = parseFloat(holding.current_price) || 0;
+  const dividendYield = parseFloat(holding.dividend_yield) || 0;
+
+  // For bonds: price is quoted per 100 nominal (as a percentage)
+  // So we need to divide by 100 to get the actual price factor
+  const isBond = holding.type && holding.type.toLowerCase() === 'bond';
+  if (isBond) {
+    purchasePrice = purchasePrice / 100;
+    currentPrice = currentPrice / 100;
+  }
+
+  const totalCost = quantity * purchasePrice;
+  const currentValue = quantity * currentPrice;
   const gainLoss = currentValue - totalCost;
-  const gainLossPercent = (gainLoss / totalCost) * 100;
-  const annualDividend = currentValue * (holding.dividend_yield / 100);
+  const gainLossPercent = totalCost > 0 ? (gainLoss / totalCost) * 100 : 0;
+  const annualDividend = currentValue * (dividendYield / 100);
 
   return {
     totalCost,

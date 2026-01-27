@@ -1,7 +1,7 @@
 import React from 'react';
-import { PlusCircle, X } from 'lucide-react';
+import { PlusCircle, X, Edit2 } from 'lucide-react';
 
-const AccountFilter = ({ accounts, selectedAccount, setSelectedAccount, setShowAddAccount, deleteAccount }) => {
+const AccountFilter = ({ accounts, selectedAccount, setSelectedAccount, setShowAddAccount, deleteAccount, editAccount }) => {
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
@@ -30,7 +30,7 @@ const AccountFilter = ({ accounts, selectedAccount, setSelectedAccount, setShowA
           <div key={account.id} className="relative group">
             <button
               onClick={() => setSelectedAccount(account.id)}
-              className={`px-4 py-2 pr-8 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 pr-16 rounded-lg font-medium transition-colors ${
                 selectedAccount == account.id
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -43,20 +43,36 @@ const AccountFilter = ({ accounts, selectedAccount, setSelectedAccount, setShowA
                 )}
               </div>
             </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteAccount(account.id);
-              }}
-              className={`absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity ${
-                selectedAccount == account.id
-                  ? 'hover:bg-red-700 text-white'
-                  : 'hover:bg-red-100 text-red-600'
-              }`}
-              title="Delete account"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <div className="absolute right-1 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  editAccount(account);
+                }}
+                className={`p-1 rounded ${
+                  selectedAccount == account.id
+                    ? 'hover:bg-blue-700 text-white'
+                    : 'hover:bg-blue-100 text-blue-600'
+                }`}
+                title="Edit account"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteAccount(account.id);
+                }}
+                className={`p-1 rounded ${
+                  selectedAccount == account.id
+                    ? 'hover:bg-red-700 text-white'
+                    : 'hover:bg-red-100 text-red-600'
+                }`}
+                title="Delete account"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         ))}
       </div>

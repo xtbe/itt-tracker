@@ -27,6 +27,9 @@ const App = () => {
   const [showAddCash, setShowAddCash] = useState(false);
   const [showFXRates, setShowFXRates] = useState(false);
 
+  const [editingAccount, setEditingAccount] = useState(null);
+  const [editingHolding, setEditingHolding] = useState(null);
+
   // Save base currency to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('baseCurrency', baseCurrency);
@@ -83,8 +86,26 @@ const App = () => {
       const created = await api.createAccount(newAccount);
       setAccounts([...accounts, created]);
       setShowAddAccount(false);
+      setEditingAccount(null);
     } catch (error) {
       console.error('Failed to create account:', error);
+    }
+  };
+
+  const editAccount = (account) => {
+    setEditingAccount(account);
+    setShowAddAccount(true);
+  };
+
+  const updateAccount = async (accountId, accountData) => {
+    try {
+      const updated = await api.updateAccount(accountId, accountData);
+      setAccounts(accounts.map(acc => acc.id === accountId ? updated : acc));
+      setShowAddAccount(false);
+      setEditingAccount(null);
+    } catch (error) {
+      console.error('Failed to update account:', error);
+      alert('Failed to update account. Please try again.');
     }
   };
 
@@ -116,8 +137,40 @@ const App = () => {
       const created = await api.createHolding(newHolding);
       setHoldings([...holdings, created]);
       setShowAddHolding(false);
+      setEditingHolding(null);
     } catch (error) {
       console.error('Failed to create holding:', error);
+    }
+  };
+
+  const editHolding = (holding) => {
+    setEditingHolding(holding);
+    setShowAddHolding(true);
+  };
+
+  const updateHolding = async (holdingId, holdingData) => {
+    try {
+      const updated = await api.updateHolding(holdingId, holdingData);
+      setHoldings(holdings.map(h => h.id === holdingId ? updated : h));
+      setShowAddHolding(false);
+      setEditingHolding(null);
+    } catch (error) {
+      console.error('Failed to update holding:', error);
+      alert('Failed to update holding. Please try again.');
+    }
+  };
+
+  const deleteHolding = async (holdingId) => {
+    if (!window.confirm('Are you sure you want to delete this holding?')) {
+      return;
+    }
+
+    try {
+      await api.deleteHolding(holdingId);
+      setHoldings(holdings.filter(h => h.id !== holdingId));
+    } catch (error) {
+      console.error('Failed to delete holding:', error);
+      alert('Failed to delete holding. Please try again.');
     }
   };
 
@@ -192,25 +245,40 @@ const App = () => {
           setSelectedAccount={setSelectedAccount}
           setShowAddAccount={setShowAddAccount}
           deleteAccount={deleteAccount}
+          editAccount={editAccount}
         />
 
         <HoldingsTable
           holdings={holdings}
           selectedAccount={selectedAccount}
           setShowAddHolding={setShowAddHolding}
+          editHolding={editHolding}
+          deleteHolding={deleteHolding}
+          baseCurrency={baseCurrency}
+          fxRates={fxRates}
         />
 
         <AddAccountModal
           showAddAccount={showAddAccount}
-          setShowAddAccount={setShowAddAccount}
+          setShowAddAccount={(show) => {
+            setShowAddAccount(show);
+            if (!show) setEditingAccount(null);
+          }}
           addAccount={addAccount}
+          editingAccount={editingAccount}
+          updateAccount={updateAccount}
         />
 
         <AddHoldingModal
           showAddHolding={showAddHolding}
-          setShowAddHolding={setShowAddHolding}
+          setShowAddHolding={(show) => {
+            setShowAddHolding(show);
+            if (!show) setEditingHolding(null);
+          }}
           addHolding={addHolding}
           accounts={accounts}
+          editingHolding={editingHolding}
+          updateHolding={updateHolding}
         />
 
         <AddCashModal
