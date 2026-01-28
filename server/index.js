@@ -4,6 +4,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import pool from './db/connection.js';
+import { runMigrations } from './db/migrate.js';
 import accountsRouter from './routes/accounts.js';
 import holdingsRouter from './routes/holdings.js';
 import cashBalancesRouter from './routes/cashBalances.js';
@@ -32,6 +33,9 @@ async function initializeDatabase() {
     const initSQL = fs.readFileSync(join(__dirname, 'db', 'init.sql'), 'utf8');
     await pool.query(initSQL);
     console.log('Database tables initialized successfully');
+
+    // Run any pending migrations
+    await runMigrations(pool);
   } catch (error) {
     console.error('Database initialization error:', error);
     throw error;
