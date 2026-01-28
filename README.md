@@ -10,6 +10,7 @@ A full-stack multi-currency investment portfolio management application with Pos
 - **Smart caching** - Three-tier caching strategy (memory → database → API)
 - **Multiple investment accounts** - Track separate portfolios with account numbers
 - **Holdings management** - Stocks, ETFs, bonds, mutual funds with cost basis tracking
+- **Investment advice** - Automated Buy/Sell/Keep recommendations based on performance metrics
 - **Cash balance management** - Multi-currency cash balances per account
 - **Real-time valuation** - Portfolio value with gain/loss calculations
 - **Dividend tracking** - Annual dividend yield monitoring
@@ -167,6 +168,7 @@ npm run dev
 - `currency` - Currency
 - `dividend_yield` - Annual dividend yield (%)
 - `purchase_date` - Purchase date
+- `advice` - Investment advice (Buy, Sell, Keep)
 - `created_at` - Timestamp
 
 ### cash_balances
@@ -202,6 +204,7 @@ docker-compose down -v
 For detailed development context, architecture decisions, and conversation history:
 
 - **[DEVELOPMENT.md](./DEVELOPMENT.md)** - Complete development context, architecture decisions, and current implementation status
+- **[ADVICE_FEATURE.md](./docs/ADVICE_FEATURE.md)** - Documentation for the investment advice feature
 - **[docs/conversation-history/](./docs/conversation-history/)** - Claude Code conversation transcripts with full development history
 
 These documents are useful for:
@@ -209,6 +212,7 @@ These documents are useful for:
 - Continuing development on another device
 - Onboarding new developers
 - Reviewing implementation details
+- Learning how to use and customize the advice feature
 
 ## License
 
