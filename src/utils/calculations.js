@@ -28,6 +28,26 @@ export const calculateHoldingMetrics = (holding) => {
   };
 };
 
+export const calculateAdvice = (holding) => {
+  const metrics = calculateHoldingMetrics(holding);
+  const gainLossPercent = metrics.gainLossPercent;
+  const dividendYield = parseFloat(holding.dividend_yield) || 0;
+
+  // Investment advice logic based on performance and dividend yield
+  // Buy: Significant loss (potential buying opportunity)
+  if (gainLossPercent < -10) {
+    return 'Buy';
+  }
+  
+  // Sell: High gains (take profits) or poor performer with low yield
+  if (gainLossPercent > 30 || (gainLossPercent < -5 && dividendYield < 1)) {
+    return 'Sell';
+  }
+  
+  // Keep: Everything else (stable performance)
+  return 'Keep';
+};
+
 export const convertCurrency = (amount, fromCurrency, toCurrency, fxRates) => {
   if (!fxRates || fromCurrency === toCurrency) return amount;
   const inBase = amount / fxRates.rates[fromCurrency];
