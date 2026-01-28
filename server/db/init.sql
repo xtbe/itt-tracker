@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS holdings (
   currency VARCHAR(10) NOT NULL,
   dividend_yield DECIMAL(5, 2) DEFAULT 0,
   purchase_date DATE NOT NULL,
+  advice VARCHAR(20) DEFAULT 'Keep',
   created_at TIMESTAMP DEFAULT NOW()
 );
 

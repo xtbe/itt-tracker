@@ -1,6 +1,6 @@
 import React from 'react';
 import { PlusCircle, Edit2, Trash2 } from 'lucide-react';
-import { calculateHoldingMetrics, convertCurrency } from '../utils/calculations';
+import { calculateHoldingMetrics, convertCurrency, calculateAdvice } from '../utils/calculations';
 
 const HoldingsTable = ({ holdings, selectedAccount, setShowAddHolding, editHolding, deleteHolding, baseCurrency, fxRates }) => {
   const filteredHoldings = selectedAccount === 'all'
@@ -34,6 +34,7 @@ const HoldingsTable = ({ holdings, selectedAccount, setShowAddHolding, editHoldi
               <th className="text-right py-3 px-4 text-slate-600 font-semibold">Total Value</th>
               <th className="text-right py-3 px-4 text-slate-600 font-semibold">Gain/Loss</th>
               <th className="text-right py-3 px-4 text-slate-600 font-semibold">Dividend Yield</th>
+              <th className="text-center py-3 px-4 text-slate-600 font-semibold">Advice</th>
               <th className="text-center py-3 px-4 text-slate-600 font-semibold">Actions</th>
             </tr>
           </thead>
@@ -111,6 +112,21 @@ const HoldingsTable = ({ holdings, selectedAccount, setShowAddHolding, editHoldi
                         ≈ {baseCurrency} {convertCurrency(metrics.annualDividend, holding.currency, baseCurrency, fxRates).toFixed(2)}/yr
                       </div>
                     )}
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    {(() => {
+                      const advice = holding.advice || calculateAdvice(holding);
+                      const adviceColors = {
+                        'Buy': 'bg-green-100 text-green-700',
+                        'Sell': 'bg-red-100 text-red-700',
+                        'Keep': 'bg-blue-100 text-blue-700'
+                      };
+                      return (
+                        <span className={`px-3 py-1 ${adviceColors[advice] || 'bg-gray-100 text-gray-700'} rounded-md text-sm font-medium`}>
+                          {advice}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="py-4 px-4">
                     <div className="flex items-center justify-center gap-2">
