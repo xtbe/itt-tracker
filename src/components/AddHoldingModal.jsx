@@ -101,7 +101,7 @@ const AddHoldingModal = ({ showAddHolding, setShowAddHolding, addHolding, accoun
               <input
                 name="purchasePrice"
                 type="number"
-                step="0.01"
+                step="0.0001"
                 required
                 defaultValue={editingHolding?.purchase_price || ''}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -112,7 +112,7 @@ const AddHoldingModal = ({ showAddHolding, setShowAddHolding, addHolding, accoun
               <input
                 name="currentPrice"
                 type="number"
-                step="0.01"
+                step="0.0001"
                 required
                 defaultValue={editingHolding?.current_price || ''}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
